@@ -1,0 +1,11 @@
+# Ignore Data Files
+data/
+*.csv
+*.zip
+*.tar.gz
+
+# Ignore System Files
+__pycache__/
+.DS_Store
+.env
+venv/
