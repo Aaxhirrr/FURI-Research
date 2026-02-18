@@ -9,127 +9,161 @@ from torch_geometric.data import HeteroData
 # ==========================================
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 INPUT_PATH = os.path.join(SCRIPT_DIR, "../data/processed/tadpole_clean.csv")
-OUTPUT_PATH = os.path.join(SCRIPT_DIR, "../data/processed/tadpole_graph.pt")
+OUTPUT_PT_PATH = os.path.join(SCRIPT_DIR, "../data/processed/tadpole_graph.pt")
+NEO4J_EXPORT_DIR = os.path.join(SCRIPT_DIR, "../data/processed/neo4j_import") # We prep this for later
+
+# ==========================================
+# LANE 1: THE BRIDGE RULES (From your Data Profiling)
+# ==========================================
+# These are the "Judge" values we found in Week 2
+STATS = {
+    'HIPPOCAMPUS_ATROPHY_THRESH': 5600,  # Mean - 1 StdDev
+    'MMSE_DECLINE_THRESH': 24,           # Clinical Cutoff
+    'HEAD_SIZE_MIN': 1100000             # For check (not used in logic yet)
+}
+
+# ==========================================
+# LANE 2: THE CONCEPTS (External Knowledge)
+# ==========================================
+# These are the "Universal Truths" we are connecting to
+CONCEPTS = {
+    0: "Concept:Brain_Atrophy",
+    1: "Concept:Cognitive_Decline",
+    2: "Concept:Genetic_Risk_APOE4",
+    3: "Concept:Amyloid_Positive"
+}
 
 def build_graph():
-    print("Building Knowledge Graph...")
+    print("🏗️ Building 'Converged' Knowledge Graph (The Professor's Bridge)...")
     
-    # 1. Load Data
     if not os.path.exists(INPUT_PATH):
-        print(f"Error: {INPUT_PATH} not found.")
+        print(f"❌ Error: {INPUT_PATH} not found.")
         return
     df = pd.read_csv(INPUT_PATH)
     
-    # 2. Initialize Graph Storage
+    # Initialize Graph
     data = HeteroData()
     
-    # 3. Create Mappings (RID -> Node Index)
+    # Mappings
     unique_rids = df['RID'].unique()
-    rid_to_index = {rid: i for i, rid in enumerate(unique_rids)}
+    rid_to_idx = {rid: i for i, rid in enumerate(unique_rids)}
     
-    print(f"   - Processing {len(unique_rids)} unique patients...")
+    # Storage for Neo4j (We build this simultaneously)
+    neo4j_nodes = []
+    neo4j_edges = []
 
-    # 4. Storage Lists
+    # --- 1. CREATE CONCEPT NODES (LANE 2) ---
+    for cid, cname in CONCEPTS.items():
+        neo4j_nodes.append({'id': f"C_{cid}", 'type': 'Concept', 'name': cname, 'features': ''})
+
+    # --- 2. PREPARE STORAGE ---
     patient_feats = []
     visit_feats = []
-    visit_labels = []   # The Answer Key (0, 1, 2)
+    visit_labels = []
     
-    # Edge Lists (Source -> Target)
-    patient_to_visit_src = []
-    patient_to_visit_dst = []
-    visit_to_visit_src = []
-    visit_to_visit_dst = []
+    # Edge Lists
+    p_to_v_src, p_to_v_dst = [], [] # Patient -> Visit
+    v_to_v_src, v_to_v_dst = [], [] # Visit -> Next Visit
+    
+    # THE CONVERGENCE EDGES (The Bridge)
+    v_to_c_src, v_to_c_dst = [], [] # Visit -> Concept
+    p_to_c_src, p_to_c_dst = [], [] # Patient -> Concept
 
-    visit_count = 0 
-
-    # 5. LOOP: Process Every Patient
+    visit_count = 0
     grouped = df.groupby('RID')
-    
+
+    print(f"   - Processing {len(unique_rids)} patients...")
+
     for rid, group in grouped:
-        # Sort by time to ensure logical flow
         group = group.sort_values('Month')
         
-        # --- A. PATIENT NODE (Static) ---
-        # Take features from the baseline (first) visit
-        first_visit = group.iloc[0]
-        
-        # Feature Vector: [Age, Gender(0/1), Education, APOE4]
-        # Safety check: Ensure Gender is numeric
-        gender = 1 if first_visit['PTGENDER'] == 'Female' else 0
-        
-        p_vec = [
-            float(first_visit['AGE']), 
-            float(gender),
-            float(first_visit['PTEDUCAT']),
-            float(first_visit['APOE4'])
-        ]
+        # --- PATIENT NODE ---
+        first = group.iloc[0]
+        # Feature Vector: [Age, Gender, Education, APOE4]
+        gender = 1 if first['PTGENDER'] == 'Female' else 0
+        p_vec = [float(first['AGE']), float(gender), float(first['PTEDUCAT']), float(first['APOE4'])]
         patient_feats.append(p_vec)
-        p_idx = rid_to_index[rid]
+        p_idx = rid_to_idx[rid]
+        
+        neo4j_nodes.append({'id': f"P_{p_idx}", 'type': 'Patient', 'name': f"Patient_{rid}", 'features': str(p_vec)})
 
-        # --- B. VISIT NODES (Dynamic) ---
-        previous_visit_idx = None
+        # === BRIDGE LOGIC 1: GENETICS ===
+        # If Data (Lane 1) has APOE4 -> Link to Knowledge (Lane 2)
+        if first['APOE4'] > 0:
+            p_to_c_src.append(p_idx)
+            p_to_c_dst.append(2) # Concept 2: Genetic Risk
+            neo4j_edges.append({'src': f"P_{p_idx}", 'dst': "C_2", 'type': 'HAS_RISK'})
+
+        previous_v_idx = None
         
         for _, row in group.iterrows():
-            current_visit_idx = visit_count
+            current_v_idx = visit_count
             
-            # NORMALIZATION: Divide Volumes by ICV (Head Size)
-            # This makes the data "comparable" across patients
-            icv = row['ICV'] if row['ICV'] > 0 else 1.0 
-            
+            # Normalization (Crucial Step)
+            icv = row['ICV'] if row['ICV'] > 0 else 1.0
             v_vec = [
-                row['Hippocampus'] / icv,
-                row['Ventricles'] / icv,
-                row['WholeBrain'] / icv,
-                row['Entorhinal'] / icv,
-                row['Fusiform'] / icv,
-                row['MidTemp'] / icv,
-                row['MMSE'],   # Scores are standard, no div needed
-                row['ADAS13'],
-                row['FDG'],
-                row['AV45']
+                row['Hippocampus'] / icv, row['Ventricles'] / icv, row['WholeBrain'] / icv,
+                row['Entorhinal'] / icv, row['Fusiform'] / icv, row['MidTemp'] / icv,
+                row['MMSE'], row['ADAS13'], row['FDG'], row['AV45']
             ]
             visit_feats.append(v_vec)
             visit_labels.append(int(row['Label']))
             
-            # --- C. CREATE EDGES ---
-            # Edge 1: Patient -> Visit (Ownership)
-            patient_to_visit_src.append(p_idx)
-            patient_to_visit_dst.append(current_visit_idx)
-            
-            # Edge 2: Visit -> Next Visit (Temporal Flow)
-            if previous_visit_idx is not None:
-                visit_to_visit_src.append(previous_visit_idx)
-                visit_to_visit_dst.append(current_visit_idx)
-            
-            # Update state
-            previous_visit_idx = current_visit_idx
+            neo4j_nodes.append({'id': f"V_{current_v_idx}", 'type': 'Visit', 'name': f"Visit_{current_v_idx}_M{row['Month']}", 'features': str(v_vec)})
+
+            # Standard Edges
+            p_to_v_src.append(p_idx)
+            p_to_v_dst.append(current_v_idx)
+            neo4j_edges.append({'src': f"P_{p_idx}", 'dst': f"V_{current_v_idx}", 'type': 'HAS_VISIT'})
+
+            if previous_v_idx is not None:
+                v_to_v_src.append(previous_v_idx)
+                v_to_v_dst.append(current_v_idx)
+                neo4j_edges.append({'src': f"V_{previous_v_idx}", 'dst': f"V_{current_v_idx}", 'type': 'NEXT_VISIT'})
+
+            # === BRIDGE LOGIC 2: ATROPHY ===
+            # If Hippocampus < 5600 (Data) -> Link to Atrophy (Knowledge)
+            if row['Hippocampus'] < STATS['HIPPOCAMPUS_ATROPHY_THRESH']:
+                v_to_c_src.append(current_v_idx)
+                v_to_c_dst.append(0) # Concept 0: Atrophy
+                neo4j_edges.append({'src': f"V_{current_v_idx}", 'dst': "C_0", 'type': 'SHOWS_SIGNS_OF'})
+
+            # === BRIDGE LOGIC 3: COGNITIVE DECLINE ===
+            # If MMSE < 24 (Data) -> Link to Decline (Knowledge)
+            if row['MMSE'] < STATS['MMSE_DECLINE_THRESH']:
+                v_to_c_src.append(current_v_idx)
+                v_to_c_dst.append(1) # Concept 1: Decline
+                neo4j_edges.append({'src': f"V_{current_v_idx}", 'dst': "C_1", 'type': 'SHOWS_SIGNS_OF'})
+
+            # === BRIDGE LOGIC 4: AMYLOID ===
+            if row['AV45'] > 1.11:
+                v_to_c_src.append(current_v_idx)
+                v_to_c_dst.append(3) # Concept 3: Amyloid Positive
+                neo4j_edges.append({'src': f"V_{current_v_idx}", 'dst': "C_3", 'type': 'SHOWS_SIGNS_OF'})
+
+            previous_v_idx = current_v_idx
             visit_count += 1
 
-    # 6. CONVERT TO PYTORCH TENSORS
-    # Nodes
+    # --- SAVE PYTORCH GRAPH (For the AI) ---
     data['patient'].x = torch.tensor(patient_feats, dtype=torch.float)
     data['visit'].x = torch.tensor(visit_feats, dtype=torch.float)
-    data['visit'].y = torch.tensor(visit_labels, dtype=torch.long) # The Target
-    
-    # Edges
-    # P -> V
-    data['patient', 'has_visit', 'visit'].edge_index = torch.tensor(
-        [patient_to_visit_src, patient_to_visit_dst], dtype=torch.long
-    )
-    # V -> V (Next Visit)
-    data['visit', 'next_visit', 'visit'].edge_index = torch.tensor(
-        [visit_to_visit_src, visit_to_visit_dst], dtype=torch.long
-    )
+    data['visit'].y = torch.tensor(visit_labels, dtype=torch.long)
+    data['concept'].x = torch.eye(len(CONCEPTS))
 
-    # 7. SAVE
-    torch.save(data, OUTPUT_PATH)
-    print("-" * 40)
-    print(f"GRAPH BUILT & SAVED: {OUTPUT_PATH}")
-    print(f"   - Patients: {data['patient'].num_nodes}")
-    print(f"   - Visits:   {data['visit'].num_nodes}")
-    print(f"   - Edges (P->V): {data['patient', 'has_visit', 'visit'].num_edges}")
-    print(f"   - Edges (V->V): {data['visit', 'next_visit', 'visit'].num_edges}")
-    print("-" * 40)
+    # Add Edges to Data Object
+    data['patient', 'has_visit', 'visit'].edge_index = torch.tensor([p_to_v_src, p_to_v_dst], dtype=torch.long)
+    data['visit', 'next_visit', 'visit'].edge_index = torch.tensor([v_to_v_src, v_to_v_dst], dtype=torch.long)
+    data['visit', 'shows_signs_of', 'concept'].edge_index = torch.tensor([v_to_c_src, v_to_c_dst], dtype=torch.long)
+    data['patient', 'has_risk', 'concept'].edge_index = torch.tensor([p_to_c_src, p_to_c_dst], dtype=torch.long)
+
+    torch.save(data, OUTPUT_PT_PATH)
+    print(f"✅ CONVERGED GRAPH SAVED: {OUTPUT_PT_PATH}")
+
+    # --- SAVE NEO4J FILES (For the next step) ---
+    os.makedirs(NEO4J_EXPORT_DIR, exist_ok=True)
+    pd.DataFrame(neo4j_nodes).to_csv(os.path.join(NEO4J_EXPORT_DIR, "nodes.csv"), index=False)
+    pd.DataFrame(neo4j_edges).to_csv(os.path.join(NEO4J_EXPORT_DIR, "edges.csv"), index=False)
+    print(f"✅ NEO4J BRIDGE READY: {NEO4J_EXPORT_DIR}")
 
 if __name__ == "__main__":
     build_graph()
