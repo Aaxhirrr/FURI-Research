@@ -1,0 +1,139 @@
+﻿git : remote: error: 
+GH013: Repository rule 
+violations found for 
+refs/heads/main.        
+At line:1 char:1
++ git push origin main 
+2>&1 | Out-File 
+-Encoding utf8 
+push_error.txt
++ 
+~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo       
+       : NotSpecifi    
+ed: (remote: error    : 
+...s/main.            
+:String) [], Rem    
+oteException
+    + FullyQualifiedEr   
+ rorId : NativeComm    
+andError
+ 
+remote: 
+remote: - GITHUB PUSH 
+PROTECTION        
+remote:   ΓÇöΓÇöΓÇöΓÇöΓÇö
+ΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓ
+ÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇ
+öΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇö
+ΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓ
+ÇöΓÇöΓÇö        
+remote:     Resolve the 
+following violations 
+before pushing again     
+   
+remote: 
+remote:     - Push 
+cannot contain secrets   
+     
+remote: 
+remote:             
+remote:      (?) Learn 
+how to resolve a blocked 
+push        
+remote:      https://docs
+.github.com/code-security
+/secret-scanning/working-
+with-secret-scanning-and-
+push-protection/working-w
+ith-push-protection-from-
+the-command-line#resolvin
+g-a-blocked-push        
+remote:             
+remote:             
+remote:       ΓÇöΓÇö 
+OpenAI API Key ΓÇöΓÇöΓÇöΓ
+ÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇ
+öΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇö
+ΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓ
+ÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇö  
+      
+remote:        
+locations:        
+remote:          - 
+commit: 8b4168fe4bccb3a5d
+1b716c3630af5b809bbee63  
+      
+remote:            path: 
+src/generate_stories.py:9
+        
+remote:          - 
+commit: 8b4168fe4bccb3a5d
+1b716c3630af5b809bbee63  
+      
+remote:            path: 
+src/generate_stories_fast
+.py:11        
+remote:          - 
+commit: 8b4168fe4bccb3a5d
+1b716c3630af5b809bbee63  
+      
+remote:            path: 
+src/summarize_timelines.p
+y:11        
+remote:             
+remote:        (?) To 
+push, remove secret from 
+commit(s) or follow this 
+URL to allow the secret. 
+       
+remote:        https://gi
+thub.com/Aaxhirrr/FURI-Re
+search/security/secret-sc
+anning/unblock-secret/3AT
+M4YXL5zwbBMEpd5ZfgLzeZlU 
+       
+remote:             
+remote:             
+remote:       ΓÇöΓÇö 
+OpenAI API Key ΓÇöΓÇöΓÇöΓ
+ÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇ
+öΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇö
+ΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓ
+ÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇöΓÇö  
+      
+remote:        
+locations:        
+remote:          - 
+commit: 1b11b08333fc91f72
+ec697a3fcdc51a474c27b5c  
+      
+remote:            path: 
+src/final_batch_processor
+.py:11        
+remote:             
+remote:        (?) To 
+push, remove secret from 
+commit(s) or follow this 
+URL to allow the secret. 
+       
+remote:        https://gi
+thub.com/Aaxhirrr/FURI-Re
+search/security/secret-sc
+anning/unblock-secret/3AT
+LtRqQnp6ihZiFF0EYFpATzRE 
+       
+remote:             
+remote: 
+remote: 
+To https://github.com/Aax
+hirrr/FURI-Research
+ ! [remote rejected] 
+main -> main (push 
+declined due to 
+repository rule 
+violations)
+error: failed to push 
+some refs to 'https://git
+hub.com/Aaxhirrr/FURI-Res
+earch'
