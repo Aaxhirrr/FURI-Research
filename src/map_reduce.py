@@ -4,7 +4,7 @@ import google.generativeai as genai
 from tqdm import tqdm
 
 # 1. SETUP: Using Gemini 1.5 Pro ($14.19 credit)
-genai.configure(api_key="AIzaSyBj-033GCRbvuZRvSnsV2KlFzhPFZYoF2g")
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY_ALT"))
 model = genai.GenerativeModel('gemini-2.5-pro')
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))

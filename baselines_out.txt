@@ -1,0 +1,26 @@
+﻿Loading data from: A:\Desktop\Research\FURI\alzheimers-project\src\../data/processed/CLEAN_1730_TIMELINES.json
+
+[DATA SPLIT SUCCESSFUL FOR RID 4022]
+Past Visits: 1 records
+Latest Visit: 1 record
+
+========================================
+≡ƒñû RUNNING C0 (STATELESS BASELINE)
+========================================
+Prompt Context Given: ONLY Latest Visit
+Output:
+Based on the provided MOST RECENT clinic visit data:
+
+*   **MMSE Score:** The data states there is a "combined trajectory of **declining MMSE scores**." This indicates a change: the patient's MMSE score has decreased. However, the specific numerical values of the MMSE score (at the last visit or the current one) are **not provided**.
+*   **Diagnosis:** The data mentions a "high likelihood of progression towards Alzheimer's disease dementia." It **does not state what the patient's diagnosis was at their last visit, nor does it provide a definitive new diagnosis** at this visit. It highlights a strong risk and progression *towards* Alzheimer's disease dementia, consistent with the observed neurodegeneration and genetic risk, but doesn't explicitly state a change in a formally given diagnosis since the last visit.
+
+========================================
+≡ƒºá RUNNING C1 (MEMORY BASELINE)
+========================================
+Prompt Context Given: Past History + Latest Visit
+Output:
+Based on the provided information:
+
+*   **MMSE Score:** A new MMSE score for the most recent clinic visit is **not provided**. The last recorded MMSE score was 23.0 at the 12-month visit (which is the visit immediately preceding the "most recent" data). Therefore, we cannot determine the change in MMSE score from the immediately preceding visit to the most recent one.
+
+*   **Diagnosis:** The patient's diagnosis at the 12-month visit was stated as a "stable **MCI diagnosis**." For the most recent clinic visit, the information indicates a "high likelihood of progression towards Alzheimer's disease dementia." While this strongly suggests worsening and a high probability of future AD diagnosis, the text **does not explicitly state that the formal diagnosis has *changed* to Alzheimer's disease dementia** at this specific visit. It still implies the current state is MCI but with a very strong trajectory towards AD dementia.

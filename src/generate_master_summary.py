@@ -3,7 +3,7 @@ import os
 import google.generativeai as genai
 
 # 1. Paste your FREE Gemini API Key here
-genai.configure(api_key="AIzaSyBM8mdPI6gOpKO520zJjOKGJP5FZlN_lgY")
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 
 # We are using gemini-1.5-pro for maximum medical reasoning
 model = genai.GenerativeModel('gemini-2.5-flash')

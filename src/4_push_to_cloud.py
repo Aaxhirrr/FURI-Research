@@ -9,7 +9,7 @@ from neo4j import GraphDatabase
 URI = "neo4j+s://a1e8aa49.databases.neo4j.io" 
 
 # This is the password you saved earlier:
-AUTH = ("a1e8aa49", "O6Km241NG57sX1iUnIkduX1WwL9mu9wd7YUWQf9F3pU")
+AUTH = ("a1e8aa49", os.environ.get("NEO4J_PASSWORD"))
 
 # PATHS
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))

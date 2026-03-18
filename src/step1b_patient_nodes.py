@@ -6,7 +6,7 @@ from tqdm import tqdm
 # 1. SETUP: NEO4J CONNECTION
 NEO4J_URI = "neo4j+s://a1e8aa49.databases.neo4j.io"
 NEO4J_USER = "a1e8aa49"
-NEO4J_PASSWORD = "O6Km241NG57sX1iUnIkduX1WwL9mu9wd7YUWQf9F3pU"
+NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD")
 AUTH = (NEO4J_USER, NEO4J_PASSWORD)
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))

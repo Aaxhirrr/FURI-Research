@@ -4,14 +4,14 @@ import google.generativeai as genai
 from neo4j import GraphDatabase
 
 # 1. Setup Gemini (We use 2.5 flash because of token limits on 1.5-pro free tier)
-genai.configure(api_key="AIzaSyBM8mdPI6gOpKO520zJjOKGJP5FZlN_lgY")
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 model = genai.GenerativeModel('gemini-2.5-flash')
 
 # 2. Neo4j Connection
 # (These are the actual credentials we discovered for your aura instance)
 NEO4J_URI = "neo4j+s://a1e8aa49.databases.neo4j.io"
 NEO4J_USER = "a1e8aa49"
-NEO4J_PASSWORD = "O6Km241NG57sX1iUnIkduX1WwL9mu9wd7YUWQf9F3pU"
+NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD")
 
 SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
 

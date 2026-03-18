@@ -1,3 +1,4 @@
+import os
 import google.generativeai as genai
 from neo4j import GraphDatabase
 import json
@@ -5,13 +6,13 @@ import sys
 
 # 1. AUTHENTICATION & SETUP
 # Replace with your actual credentials from credentials-a1e8aa49.txt
-genai.configure(api_key="AIzaSyBM8mdPI6gOpKO520zJjOKGJP5FZlN_lgY")
+genai.configure(api_key=os.environ.get("GEMINI_API_KEY"))
 # Use gemini-2.5-flash due to free tier quotas on pro
 model = genai.GenerativeModel('gemini-2.5-flash')
 
 NEO4J_URI = "neo4j+s://a1e8aa49.databases.neo4j.io"
 NEO4J_USER = "a1e8aa49"
-NEO4J_PASSWORD = "O6Km241NG57sX1iUnIkduX1WwL9mu9wd7YUWQf9F3pU"
+NEO4J_PASSWORD = os.environ.get("NEO4J_PASSWORD")
 
 # Connect to the cloud instance once
 try:
