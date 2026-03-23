@@ -36,7 +36,7 @@ I didn't want to use simple structured spreadsheets; I wanted this AI to read re
 * **The Metric:** I processed the massive TADPOLE dataset and translated raw biomarkers and cognitive tests into **8,600+ sequential natural-language clinic visits** across **1,730 real ADNI patients**. 
 * **The Tech:** Using multithreaded pipelines running OpenAI’s `gpt-4o` and Google's `gemini-2.5-flash`, I summarized these visits into cohesive timelines mapping structural brain changes (Hippocampal Atrophy) and cognitive decline (MMSE drops). 
 
-### 2. Building the 'FuriMasterKG' (The First Longitudinal Clinical Graph)
+### 2. Building the First Longitudinal Clinical Graph
 Most medical Knowledge Graphs (like PrimeKG or AlzKB) are just molecular dictionaries linking proteins to drugs. I built something fundamentally different: a **Patient-Trajectory Knowledge Graph** housed in a live Neo4j AuraDB cloud instance.
 * **Macro-KG (The Ground Truth):** I extracted the absolute rules of the cohort directly into the graph. It mathematically tracks the global benchmarks.
 * **Micro-KG (The Patient Mesh):** I securely injected all 1,730 patient timelines into the graph.
