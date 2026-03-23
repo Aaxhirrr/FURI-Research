@@ -1,130 +1,92 @@
 "use client";
 
-import React from "react";
-import LucideCircleDollarSignIcon from "lucide-react"; // Import the missing icon component
-
+import React, { useState } from "react";
 import { cn } from "@/lib/utils";
-import type { Section } from "@/app/page";
 import {
+  BrainCircuit,
+  Search,
+  Database,
   LayoutDashboard,
-  GitBranch,
-  Handshake,
-  Users,
-  BarChart3,
-  ChevronLeft,
-  ChevronRight,
-  CircleDollarSign,
-  Building2,
-  TrendingUp,
-  Settings,
+  Network,
+  MessageSquare
 } from "lucide-react";
 
-interface SidebarProps {
-  activeSection: Section;
-  onSectionChange: (section: Section) => void;
-  collapsed: boolean;
-  onCollapsedChange: (collapsed: boolean) => void;
-}
-
-const navItems: { id: Section; label: string; icon: React.ElementType }[] = [
-  { id: "overview", label: "Overview", icon: LayoutDashboard },
-  { id: "pipeline", label: "Pipeline", icon: GitBranch },
-  { id: "deals", label: "Deals", icon: Handshake },
-  { id: "customers", label: "Customers", icon: Building2 },
-  { id: "team", label: "Team", icon: Users },
-  { id: "forecasting", label: "Forecasting", icon: TrendingUp },
-  { id: "reports", label: "Reports", icon: BarChart3 },
-  { id: "settings", label: "Settings", icon: Settings },
-];
-
-export function Sidebar({
-  activeSection,
-  onSectionChange,
-  collapsed,
-  onCollapsedChange,
-}: SidebarProps) {
+export function Sidebar({ onRidSubmit, activeTab, onTabChange, rid }: any) {
   return (
-    <aside
-      className={cn(
-        "fixed left-0 top-0 z-40 h-screen bg-sidebar border-r border-sidebar-border transition-all duration-300 ease-out flex flex-col",
-        collapsed ? "w-[72px]" : "w-[260px]"
-      )}
-    >
+    <aside className="fixed left-0 top-0 z-40 h-screen bg-sidebar border-r border-sidebar-border flex flex-col w-[300px]">
       {/* Logo */}
-      <div className="h-16 flex items-center px-4 border-b border-sidebar-border">
-        <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-white">
-            <CircleDollarSign className="w-5 h-5 text-accent-foreground" />
+      <div className="h-16 flex items-center px-4 border-b border-sidebar-border shrink-0">
+        <div className="flex items-center gap-3 w-full">
+          <div className="w-9 h-9 rounded-lg flex items-center justify-center shrink-0 bg-primary/10">
+            <BrainCircuit className="w-5 h-5 text-primary animate-pulse" />
           </div>
-          <span
-            className={cn(
-              "font-semibold text-lg text-sidebar-foreground whitespace-nowrap transition-all duration-300",
-              collapsed ? "opacity-0 w-0" : "opacity-100 w-auto"
-            )}
-          >
-            SalesOps
+          <span className="font-bold text-lg text-sidebar-foreground whitespace-nowrap">
+            FURI Master
           </span>
         </div>
       </div>
 
-      {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-1 overflow-hidden">
-        {navItems.map((item) => {
-          const Icon = item.icon;
-          const isActive = activeSection === item.id;
+      {/* Controls & Nav */}
+      <div className="flex-1 p-4 space-y-6 overflow-y-auto flex flex-col">
+        {/* Navigation Tabs */}
+        <div className="space-y-1">
+           <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider pl-3 mb-2 block">
+              Application Modules
+           </label>
+           <button onClick={() => onTabChange('evaluate')} className={cn("w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition", activeTab === 'evaluate' ? "bg-sidebar-accent text-sidebar-foreground" : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground")}>
+              <LayoutDashboard className="w-4 h-4" /> Timeline Evaluation
+           </button>
+           <button onClick={() => onTabChange('graph')} className={cn("w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition", activeTab === 'graph' ? "bg-sidebar-accent text-sidebar-foreground" : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground")}>
+              <Network className="w-4 h-4" /> Global Knowledge Graph
+           </button>
+           <button onClick={() => onTabChange('consult')} className={cn("w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition", activeTab === 'consult' ? "bg-sidebar-accent text-sidebar-foreground" : "text-muted-foreground hover:bg-sidebar-accent/50 hover:text-sidebar-foreground")}>
+              <MessageSquare className="w-4 h-4" /> Predictive Consultant
+           </button>
+        </div>
 
-          return (
-            <button
-              key={item.id}
-              onClick={() => onSectionChange(item.id)}
-              className={cn(
-                "w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200 group relative",
-                isActive
-                  ? "bg-sidebar-accent text-sidebar-foreground"
-                  : "text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50"
-              )}
-            >
-              {/* Active indicator */}
-              <span
-                className={cn(
-                  "absolute left-0 top-1/2 -translate-y-1/2 w-1 h-6 rounded-r-full bg-accent transition-all duration-300",
-                  isActive ? "opacity-100" : "opacity-0"
-                )}
-              />
-              <Icon
-                className={cn(
-                  "w-5 h-5 shrink-0 transition-transform duration-200",
-                  isActive ? "text-accent" : "group-hover:scale-110"
-                )}
-              />
-              <span
-                className={cn(
-                  "whitespace-nowrap transition-all duration-300",
-                  collapsed ? "opacity-0 w-0 overflow-hidden" : "opacity-100"
-                )}
-              >
-                {item.label}
-              </span>
-            </button>
-          );
-        })}
-      </nav>
+        {/* Patient Selector */}
+        <div className="space-y-2 pt-4 border-t border-sidebar-border/50">
+          <label className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider pl-1">
+            Active Patient ID
+          </label>
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+            <input
+              type="text"
+              value={rid}
+              onChange={(e) => onRidSubmit(e.target.value)}
+              placeholder="Search RID (e.g. 4022)"
+              className="w-full bg-background border border-border rounded-md pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary/50 text-foreground shadow-sm transition-all"
+            />
+          </div>
+          <p className="text-[11px] text-muted-foreground mt-1 pl-1">
+            Updates timeline automatically.
+          </p>
+        </div>
 
-      {/* Collapse button */}
-      <div className="p-3 border-t border-sidebar-border">
-        <button
-          onClick={() => onCollapsedChange(!collapsed)}
-          className="w-full flex items-center justify-center gap-2 px-3 py-2 rounded-lg text-sm text-muted-foreground hover:text-sidebar-foreground hover:bg-sidebar-accent/50 transition-all duration-200"
-        >
-          {collapsed ? (
-            <ChevronRight className="w-5 h-5" />
-          ) : (
-            <>
-              <ChevronLeft className="w-5 h-5" />
-              <span>Collapse</span>
-            </>
-          )}
-        </button>
+        <div className="flex-1" />
+
+        {/* Global Flex / Pinned Stats */}
+        <div className="bg-sidebar-accent/50 rounded-xl p-4 border border-sidebar-border mb-4 shrink-0">
+          <div className="flex items-center gap-2 mb-3">
+            <Database className="w-4 h-4 text-primary" />
+            <h4 className="text-sm font-semibold text-sidebar-foreground tracking-tight">Global FURI Benchmarks</h4>
+          </div>
+          <div className="space-y-3">
+            <div>
+              <div className="text-xs text-muted-foreground">Active Patients</div>
+              <div className="text-sm font-medium text-foreground">1,730 Nodes</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Conversion Rate</div>
+              <div className="text-sm font-medium text-emerald-500">46.0% MCI-to-Dementia</div>
+            </div>
+            <div>
+              <div className="text-xs text-muted-foreground">Hippocampal Atrophy</div>
+              <div className="text-sm font-medium text-rose-500">3.9% Annual Loss</div>
+            </div>
+          </div>
+        </div>
       </div>
     </aside>
   );

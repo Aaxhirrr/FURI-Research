@@ -2,62 +2,41 @@
 
 import { useState } from "react";
 import { Sidebar } from "@/components/dashboard/sidebar";
-import { Header } from "@/components/dashboard/header";
 import { OverviewSection } from "@/components/dashboard/sections/overview";
-import { PipelineSection } from "@/components/dashboard/sections/pipeline";
-import { DealsSection } from "@/components/dashboard/sections/deals";
-import { CustomersSection } from "@/components/dashboard/sections/customers";
-import { TeamSection } from "@/components/dashboard/sections/team";
-import { ForecastingSection } from "@/components/dashboard/sections/forecasting";
-import { ReportsSection } from "@/components/dashboard/sections/reports";
-import { SettingsSection } from "@/components/dashboard/sections/settings";
+import { GraphSection } from "@/components/dashboard/sections/graph";
+import { ConsultantSection } from "@/components/dashboard/sections/consultant";
 
-export type Section = "overview" | "pipeline" | "deals" | "customers" | "team" | "forecasting" | "reports" | "settings";
+export type Section = "evaluate" | "graph" | "consult";
 
 export default function Dashboard() {
-  const [activeSection, setActiveSection] = useState<Section>("overview");
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [activeTab, setActiveTab] = useState<Section>("evaluate");
+  const [rid, setRid] = useState("4022"); // Default test subject
 
   const renderSection = () => {
-    switch (activeSection) {
-      case "overview":
-        return <OverviewSection />;
-      case "pipeline":
-        return <PipelineSection />;
-      case "deals":
-        return <DealsSection />;
-      case "customers":
-        return <CustomersSection />;
-      case "team":
-        return <TeamSection />;
-      case "forecasting":
-        return <ForecastingSection />;
-      case "reports":
-        return <ReportsSection />;
-      case "settings":
-        return <SettingsSection />;
+    switch (activeTab) {
+      case "evaluate":
+        return <OverviewSection rid={rid} />;
+      case "graph":
+        return <GraphSection />;
+      case "consult":
+        return <ConsultantSection />;
       default:
-        return <OverviewSection />;
+        return <OverviewSection rid={rid} />;
     }
   };
 
   return (
-    <div className="flex min-h-screen bg-background">
+    <div className="flex min-h-screen bg-background text-foreground font-sans">
       <Sidebar
-        activeSection={activeSection}
-        onSectionChange={setActiveSection}
-        collapsed={sidebarCollapsed}
-        onCollapsedChange={setSidebarCollapsed}
+        activeTab={activeTab}
+        onTabChange={setActiveTab}
+        rid={rid}
+        onRidSubmit={(newRid: string) => setRid(newRid)}
       />
-      <div
-        className={`flex-1 flex flex-col transition-all duration-300 ease-out ${
-          sidebarCollapsed ? "ml-[72px]" : "ml-[260px]"
-        }`}
-      >
-        <Header activeSection={activeSection} />
-        <main className="flex-1 p-6 overflow-auto">
+      <div className="flex-1 flex flex-col ml-[300px]">
+        <main className="flex-1 p-8 overflow-auto">
           <div
-            key={activeSection}
+            key={activeTab}
             className="animate-in fade-in slide-in-from-bottom-4 duration-500"
           >
             {renderSection()}
