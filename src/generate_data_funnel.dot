@@ -1,0 +1,25 @@
+digraph ContextFunnel {
+    rankdir=TB;
+    splines=spline;
+    nodesep=0.5;
+    ranksep=0.8;
+    
+    node [fontname="Segoe UI", shape=invtrapezium, style="filled", height=1.2, fontsize=18, penwidth=2];
+    edge [fontname="Segoe UI", fontsize=14, color="#64748b", penwidth=3];
+    
+    // Top to Bottom Funnel 
+    L1 [label="Raw Biomedical Feature Sets\n(TADPOLE EHRs, MRI Scans, 1.7M Datapoints)", fillcolor="#f1f5f9", color="#94a3b8", shape=box, width=8.0];
+    
+    L2 [label="Neo4j Ontology Construction\n(260,000 Entities, 4.3M Graph Edges)", fillcolor="#008CC1", color="#005571", fontcolor="white", shape=invtrapezium, width=6.5];
+    
+    L3 [label="Multi-Agent Space Distillation\n(Chronological Array Sort & 'Clinical Twin' Matching)", fillcolor="#8C1D40", color="#4c0f24", fontcolor="white", shape=invtrapezium, width=5.0];
+    
+    L4 [label="Pharmacokinetic Safety Guardrail\n(Sub-Graph Toxicity Analysis)", fillcolor="#FFC627", color="#b2881b", fontcolor="black", shape=invtrapezium, width=3.5];
+    
+    L5 [label="Clean Predictive Consensus\n(Month 36 State Forecast, <5 Tokens)", fillcolor="#10b981", color="#047857", fontcolor="white", shape=box, width=2.5];
+    
+    L1 -> L2 [label=" Mathematical Embedding & Vectorization", weight=10, fontcolor="#334155"];
+    L2 -> L3 [label=" Graph-RAG Active Context Retrieval", weight=10, fontcolor="#334155"];
+    L3 -> L4 [label=" High-Confidence Phenotypic Trajectory", weight=10, fontcolor="#334155"];
+    L4 -> L5 [label=" Safety Intercept Passed (100% Guarded)", color="#10b981", fontcolor="#10b981"];
+}

@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Network } from "vis-network";
-import { Loader2, RefreshCcw, AlertCircle } from "lucide-react";
+import { Loader2, RefreshCcw, AlertCircle, Sun, Moon } from "lucide-react";
 
 export function GraphSection() {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -8,7 +8,55 @@ export function GraphSection() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [limit, setLimit] = useState(200);
+  const [isLightMode, setIsLightMode] = useState(false);
   
+  const getNetworkOptions = (light: boolean) => ({
+    nodes: {
+      shape: "dot",
+      size: 20,
+      font: { 
+        color: light ? "#000000" : "#ffffff", 
+        size: 16, 
+        strokeWidth: 4,
+        strokeColor: light ? "rgba(255, 255, 255, 0.9)" : "rgba(10, 10, 10, 0.9)",
+        face: "Inter, sans-serif"
+      },
+      borderWidth: 2
+    },
+    edges: {
+      width: 1.5,
+      font: { 
+        color: light ? "#333333" : "#dddddd", 
+        size: 14, 
+        align: "middle",
+        strokeWidth: 4,
+        strokeColor: light ? "#ffffff" : "#0a0a0a"
+      },
+      color: { 
+        color: light ? "#cbd5e1" : "#444444", 
+        highlight: light ? "#64748b" : "#888888", 
+        hover: light ? "#64748b" : "#888888" 
+      },
+      smooth: true
+    },
+    physics: {
+      solver: 'forceAtlas2Based',
+      forceAtlas2Based: {
+        gravitationalConstant: -150,
+        centralGravity: 0.02,
+        springConstant: 0.08,
+        springLength: 120,
+        damping: 0.4
+      },
+      stabilization: { iterations: 150 }
+    },
+    groups: {
+      Patient: { color: { background: "#10b981", border: "#059669" } },
+      ClinicalState: { color: { background: "#f43f5e", border: "#e11d48" } },
+      Biomarker: { color: { background: "#3b82f6", border: "#2563eb" } }
+    }
+  });
+
   const loadGraph = async () => {
     if (!containerRef.current) return;
     setLoading(true);
@@ -25,36 +73,7 @@ export function GraphSection() {
       }
       const data = await res.json();
       
-      const options = {
-        nodes: {
-          shape: "dot",
-          size: 16,
-          font: { color: "#ffffff", size: 12 },
-          borderWidth: 2
-        },
-        edges: {
-          width: 1,
-          font: { color: "#888888", size: 10, align: "middle" },
-          color: { color: "#444444", highlight: "#888888", hover: "#888888" },
-          smooth: true
-        },
-        physics: {
-          solver: 'forceAtlas2Based',
-          forceAtlas2Based: {
-            gravitationalConstant: -100,
-            centralGravity: 0.02,
-            springConstant: 0.08,
-            springLength: 100,
-            damping: 0.4
-          },
-          stabilization: { iterations: 150 }
-        },
-        groups: {
-          Patient: { color: { background: "#10b981", border: "#059669" } },
-          ClinicalState: { color: { background: "#f43f5e", border: "#e11d48" } },
-          Biomarker: { color: { background: "#3b82f6", border: "#2563eb" } }
-        }
-      };
+      const options = getNetworkOptions(isLightMode);
       
       if (!containerRef.current) return;
       networkRef.current = new Network(containerRef.current, data, options);
@@ -76,6 +95,13 @@ export function GraphSection() {
     };
   }, []);
 
+  // Update visual options dynamically when the user toggles backgrounds
+  useEffect(() => {
+    if (networkRef.current) {
+      networkRef.current.setOptions(getNetworkOptions(isLightMode));
+    }
+  }, [isLightMode]);
+
   return (
     <div className="flex flex-col h-[calc(100vh-6rem)] animate-in fade-in duration-500">
       <div className="flex items-center justify-between mb-6 shrink-0">
@@ -83,7 +109,15 @@ export function GraphSection() {
           <h2 className="text-2xl font-bold tracking-tight">Global Knowledge Graph</h2>
           <p className="text-muted-foreground">Interactive visualization of the complete FuriMasterKG ontology.</p>
         </div>
-        <div className="flex items-center gap-6">
+        <div className="flex items-center gap-4">
+          <button 
+            onClick={() => setIsLightMode(!isLightMode)}
+            className="p-2.5 rounded-lg border border-border bg-card text-foreground hover:bg-muted transition-colors shadow-sm flex items-center justify-center"
+            title="Toggle Graph Background"
+          >
+            {isLightMode ? <Moon className="w-5 h-5 text-primary" /> : <Sun className="w-5 h-5 text-primary" />}
+          </button>
+          
           <div className="flex items-center gap-3 bg-card border border-border px-4 py-2 rounded-lg shadow-sm">
             <span className="text-sm font-medium text-foreground whitespace-nowrap">Load <span className="text-primary">{limit}</span> Nodes</span>
             <input 
@@ -104,14 +138,17 @@ export function GraphSection() {
            <p>{error}</p>
          </div>
       ) : (
-        <div className="flex-1 bg-card border border-border rounded-xl shadow-sm relative overflow-hidden">
+        <div 
+           className="flex-1 rounded-xl shadow-sm relative overflow-hidden ring-1 ring-border transition-colors duration-500" 
+           style={{ backgroundColor: isLightMode ? '#ffffff' : '#0a0a0a' }}
+        >
           {loading && (
              <div className="absolute inset-0 bg-background/50 backdrop-blur-sm z-10 flex flex-col items-center justify-center text-primary">
                <Loader2 className="w-8 h-8 animate-spin mb-4" />
                <p className="font-semibold">Querying Neo4j Aura Graph...</p>
              </div>
           )}
-          <div ref={containerRef} className="w-full h-full bg-[#0a0a0a]" />
+          <div ref={containerRef} className="w-full h-full" />
         </div>
       )}
     </div>

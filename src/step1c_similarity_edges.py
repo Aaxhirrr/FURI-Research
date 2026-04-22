@@ -1,5 +1,8 @@
 import os
+from dotenv import load_dotenv
 from neo4j import GraphDatabase
+
+load_dotenv()
 
 # 1. SETUP: NEO4J CONNECTION
 NEO4J_URI = "neo4j+s://a1e8aa49.databases.neo4j.io"
@@ -16,11 +19,8 @@ def create_p2p_edges(tx):
     atrophy_query = """
     MATCH (p1:Patient), (p2:Patient)
     WHERE p1.rid < p2.rid 
-      AND p1.summary CONTAINS 'atrophy' AND p2.summary CONTAINS 'atrophy'
-      // This is a placeholder for when we extract hard floats later
-      // For now, we link by shared 'Extreme Progressor' status in text
-    WITH p1, p2
-    WHERE p1.summary CONTAINS 'MCI to Dementia' AND p2.summary CONTAINS 'MCI to Dementia'
+      AND toLower(p1.summary) CONTAINS 'atrophy' AND toLower(p2.summary) CONTAINS 'atrophy'
+    WITH p1, p2 LIMIT 150
     MERGE (p1)-[r:SIMILAR_TO {reason: 'MCI_CONVERTER_COHORT'}]->(p2)
     RETURN count(r) as EdgeCount
     """

@@ -1,0 +1,86 @@
+digraph FURI_Architecture {
+    rankdir=LR;
+    splines=spline;
+    nodesep=0.7;
+    ranksep=1.2;
+    fontname="Segoe UI";
+    
+    node [fontname="Segoe UI", shape=box, style="filled,rounded", width=3.0, height=0.9, fontsize=14];
+    edge [fontname="Segoe UI", fontsize=12, color="#64748b", penwidth=2.5];
+
+    // Colors:
+    // Neo4j Blue: #008CC1
+    // Agent Maroon: #8C1D40
+    // Input Gray: #e2e8f0
+    // Output Green: #10b981
+    // Alert Red: #ef4444
+
+    subgraph cluster_Data {
+        label = "Layer 1: Raw Ingestion";
+        style="rounded,filled";
+        color="#f8fafc";
+        penwidth=2;
+        fontsize=16;
+        fontcolor="#334155";
+        margin=20;
+        
+        Input [label="Longitudinal Patient Data\n(MMSE, MRI Atrophy, Drug Interactions)", fillcolor="#e2e8f0", color="#64748b", penwidth=2, fontsize=14];
+    }
+
+    subgraph cluster_Swarm {
+        label = "Layer 2: Model C3 (Multi-Agent System)";
+        style="rounded,filled";
+        color="#fdf2f8";
+        penwidth=2;
+        fontsize=16;
+        fontcolor="#831843";
+        margin=20;
+        
+        A2 [label="Agent 2:\nChronology Expert\n(Resolves Temporal Blindness)", fillcolor="#8C1D40", color="#FFC627", fontcolor="#ffffff", penwidth=3];
+        A1 [label="Agent 1:\nDiagnostician\n(Finds Clinical Twins)", fillcolor="#8C1D40", color="#FFC627", fontcolor="#ffffff", penwidth=3];
+        A3 [label="Agent 3:\nPharmacokinetic Guard\n(Safety Interception)", fillcolor="#8C1D40", color="#FFC627", fontcolor="#ffffff", penwidth=3];
+    }
+
+    subgraph cluster_Neo4j {
+        label = "Layer 3: Dual Knowledge Graph (Neo4j)";
+        style="rounded,filled";
+        color="#e0f2fe";
+        penwidth=2;
+        fontsize=16;
+        fontcolor="#0369a1";
+        margin=20;
+
+        Micro_KG [label="Micro-KG (Patient Mesh)\n(:Patient)-[:SIMILAR_TO]->(:Patient)", fillcolor="#008CC1", fontcolor="#ffffff", color="#005571", penwidth=3];
+        Macro_KG [label="Macro-KG (Global Rules)\nBiological Truths (e.g., 46% MCI→AD)", fillcolor="#008CC1", fontcolor="#ffffff", color="#005571", penwidth=3];
+        
+        // Invisible edge to align KGs
+        Micro_KG -> Macro_KG [style=invis, weight=10];
+    }
+
+    subgraph cluster_Output {
+        label = "Layer 4: Verification & Output";
+        style="rounded,filled";
+        color="#f0fdf4";
+        penwidth=2;
+        fontsize=16;
+        fontcolor="#166534";
+        margin=20;
+
+        Output_Safe [label="Final Forecast:\nMonth 36 Safe AD Trajectory", fillcolor="#10b981", color="#047857", fontcolor="#ffffff", penwidth=3];
+        Output_Alert [label="Hard Stop Intercepted\n(94.6% Success Rate)", fillcolor="#ef4444", color="#991b1b", fontcolor="#ffffff", penwidth=3];
+    }
+
+    // Connections
+    Input -> A2 [label=" Raw Disordered Phenotypes", fontcolor="#475569", weight=10];
+    A2 -> A1 [label=" Sequenced Longitudinal Data\n(Overcomes Hallucination)", fontcolor="#475569", weight=10];
+    
+    A1 -> Micro_KG [label=" Trajectory Query\nMATCH (p1:Patient)", dir="both", fontcolor="#0284c7"];
+    A1 -> A3 [label=" Proposes M36 Forecast &\nMedication (e.g. Memantine)", fontcolor="#831843", weight=10];
+    
+    A3 -> Macro_KG [label=" Validates against\nBiological Laws", dir="both", fontcolor="#0284c7"];
+    
+    A3 -> Output_Safe [label=" Passes Clinical Rules", color="#10b981", fontcolor="#10b981", weight=10, penwidth=3];
+    A3 -> Output_Alert [label=" Contraindication Detected", color="#ef4444", fontcolor="#ef4444", penwidth=3];
+    
+    Output_Alert -> A1 [label=" Reroute for New Forecast", style="dashed", color="#ef4444", fontcolor="#ef4444", penwidth=2, constraint=false];
+}
